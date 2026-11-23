@@ -39,7 +39,7 @@ def fetch():
     if not own:
         raise SystemExit(f"계정 조회 실패: {me}")
     handled = set(load("state/handled.json", {}).keys())
-    media = call("GET", f"{UID}/media", fields="id,caption,permalink,timestamp,comments_count", limit=30)
+    media = call("GET", f"{UID}/media", fields="id,caption,permalink,timestamp,comments_count,like_count", limit=30)
     if "error" in media:
         raise SystemExit(f"게시물 조회 실패: {media['error']}")
     pending, errors = [], []
@@ -62,7 +62,7 @@ def fetch():
         seen.setdefault(c["comment_id"], {"do": "seen"})
     save("state/handled.json", seen)
     save("inbox/comments.json", {"fetched_at": datetime.datetime.now(KST).isoformat(timespec="minutes"),
-                                 "account": own, "pending": pending, "errors": errors})
+                                 "account": own, "posts": [{"media_id": m["id"], "permalink": m.get("permalink"), "timestamp": m.get("timestamp"), "likes": m.get("like_count"), "comments": m.get("comments_count"), "post": (m.get("caption") or "").split("\n")[0]} for m in media.get("data", [])], "pending": pending, "errors": errors})
     print(f"@{own}: 게시물 {len(media.get('data', []))}개, 답할 댓글 {len(pending)}개, 오류 {len(errors)}건")
     for e in errors:
         print("오류:", e)
