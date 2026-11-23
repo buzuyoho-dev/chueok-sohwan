@@ -1,6 +1,16 @@
 {
- "fetched_at": "2026-11-24T02:15+09:00",
+ "fetched_at": "2026-11-24T02:20+09:00",
  "account": "chueok.sohwan",
+ "posts": [
+  {
+   "media_id": "18140081167782455",
+   "permalink": "https://www.instagram.com/p/DgF5v6lmKmk/",
+   "timestamp": "2026-11-23T17:20:18+0000",
+   "likes": 0,
+   "comments": 0,
+   "post": "20년 전 그해, 우리는 뭘 사고 뭘 봤을까? 🛍️"
+  }
+ ],
  "pending": [],
  "errors": []
 }
