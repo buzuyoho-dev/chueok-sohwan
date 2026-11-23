@@ -1,0 +1,29 @@
+name: 매일 인스타 게시
+on:
+  schedule:
+    - cron: "30 11 * * *"   # 매일 20:30 KST (11:30 UTC)
+  workflow_dispatch:
+    inputs:
+      post_date: { description: "올릴 날짜 YYYY-MM-DD (비우면 오늘)", required: false }
+      dry_run: { description: "1이면 실제로 올리지 않고 확인만", required: false }
+permissions:
+  contents: write
+concurrency: publish
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 게시
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          POST_DATE: ${{ inputs.post_date }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: python3 scripts/publish.py
+      - name: 게시 기록 저장
+        run: |
+          git config user.name "autopost-bot"
+          git config user.email "autopost-bot@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || (git commit -m "게시 완료 기록" && git pull --rebase && git push)
