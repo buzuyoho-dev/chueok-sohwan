@@ -1,5 +1,5 @@
 """댓글 관리. 토큰은 GitHub 시크릿에만 있고, Claude는 파일(inbox/outbox)로만 주고받는다.
-MODE=fetch : 최근 게시물의 '아직 답 안 한' 댓글을 inbox/comments.json에 저장
+MODE=fetch : 최근 게시물 30개의 모든 댓글(좋아요 수·답글 수·새 댓글 여부 포함)을 inbox/comments.json에 저장
 MODE=reply : outbox/actions.json 실행 후 기록(state/handled.json)에 남기고 outbox 비움
   actions.json = [{"comment_id": "...", "do": "reply", "message": "..."},
                   {"comment_id": "...", "do": "hide"},      # 광고·스팸 숨김
@@ -46,17 +46,21 @@ def fetch():
     for m in media.get("data", []):
         if not m.get("comments_count"):
             continue
-        res = call("GET", f"{m['id']}/comments", fields="id,text,username,timestamp,replies{id,username,text}", limit=100)
+        res = call("GET", f"{m['id']}/comments", fields="id,text,username,timestamp,like_count,replies{id,username,text,like_count}", limit=100)
         if "error" in res:
             errors.append(res["error"]); continue
         for c in res.get("data", []):
-            if c.get("username") == own or c["id"] in handled:
+            if c.get("username") == own:
                 continue
-            if any(r.get("username") == own for r in c.get("replies", {}).get("data", [])):
-                continue
-            pending.append({"comment_id": c["id"], "media_id": m["id"], "permalink": m.get("permalink"),
+            pending.append({"like_count": c.get("like_count", 0), "replies": len(c.get("replies", {}).get("data", [])),
+                            "new": c["id"] not in handled, "comment_id": c["id"], "media_id": m["id"], "permalink": m.get("permalink"),
                             "post": (m.get("caption") or "").split("\n")[0], "username": c.get("username"),
                             "text": c.get("text"), "timestamp": c.get("timestamp")})
+    pending.sort(key=lambda c: (c["media_id"], -c["like_count"], -c["replies"]))
+    seen = load("state/handled.json", {})
+    for c in pending:
+        seen.setdefault(c["comment_id"], {"do": "seen"})
+    save("state/handled.json", seen)
     save("inbox/comments.json", {"fetched_at": datetime.datetime.now(KST).isoformat(timespec="minutes"),
                                  "account": own, "pending": pending, "errors": errors})
     print(f"@{own}: 게시물 {len(media.get('data', []))}개, 답할 댓글 {len(pending)}개, 오류 {len(errors)}건")
