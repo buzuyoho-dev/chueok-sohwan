@@ -30,6 +30,16 @@ def check(post, used):
     text = re.sub(r"<[^>]+>", " ", body)
     if len(re.sub(r"\s+", " ", text)) < MIN_CHARS:
         errs.append("too short")
+    figs = re.findall(r"<figure[^>]*>(.*?)</figure>", body, re.S)
+    if not 1 <= len(figs) <= 2:
+        errs.append(f"need 1-2 images, got {len(figs)}")
+    for f in figs:
+        if not re.search(r'<img [^>]*src="https://upload\.wikimedia\.org/', f) or ' alt="' not in f:
+            errs.append("image must be a Wikimedia Commons file with alt text")
+        if not re.search(r"<figcaption>.*Wikimedia Commons.*</figcaption>", f, re.S):
+            errs.append("image needs a credit caption (author, license, Wikimedia Commons)")
+    if len(re.findall(r"<img ", body)) != len(figs):
+        errs.append("every image must sit in a <figure> with credit")
     if post["term"].lower() in used:
         errs.append(f"duplicate term: {post['term']}")
     return errs
