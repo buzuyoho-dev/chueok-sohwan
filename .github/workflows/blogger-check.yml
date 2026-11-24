@@ -1,0 +1,24 @@
+name: blogger-check
+on:
+  push:
+    branches: [claude/project-thread-5oimre]
+    paths: [.github/workflows/blogger-check.yml]
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Korea Decoded 블로그 연결 확인 (읽기 전용)
+        env:
+          CID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          CSEC: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          RT: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          BLOG_ID: "6591486499474318581"
+        run: |
+          TOKEN=$(curl -s https://oauth2.googleapis.com/token \
+            -d client_id="$CID" -d client_secret="$CSEC" \
+            -d refresh_token="$RT" -d grant_type=refresh_token | jq -r .access_token)
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then echo "TOKEN_FAIL"; exit 1; fi
+          echo "TOKEN_OK"
+          curl -s -H "Authorization: Bearer $TOKEN" \
+            "https://www.googleapis.com/blogger/v3/blogs/$BLOG_ID" | jq '{name, url, posts: .posts.totalItems}'
