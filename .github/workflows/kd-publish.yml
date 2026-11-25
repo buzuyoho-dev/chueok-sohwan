@@ -1,7 +1,11 @@
 name: korea-decoded-publish
 on:
   schedule:
-    - cron: "10 13 * * 1-5"   # 월~금 22:10 KST (미국 동부 아침)
+    # 월~금 22:10 KST(미국 동부 아침). 예약이 밀리거나 빠질 때를 대비해 여러 번 시도,
+    # 스크립트가 하루 1편·21:00~05:59 KST만 게시한다.
+    - cron: "10 13 * * 1-5"
+    - cron: "40 14 * * 1-5"
+    - cron: "10 16 * * 1-5"
   workflow_dispatch:
     inputs:
       day:
@@ -26,4 +30,4 @@ jobs:
           git config user.name "korea-decoded-bot"
           git config user.email "actions@users.noreply.github.com"
           git add korea-decoded
-          git diff --cached --quiet || (git commit -m "Korea Decoded 게시 기록" && git push)
+          git diff --cached --quiet || (git commit -m "Korea Decoded 게시 기록" && git pull --rebase origin main && git push)
