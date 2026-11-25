@@ -67,7 +67,11 @@ def check_urls(urls):
 
 def main():
     dry = bool(os.environ.get("DRY_RUN"))
-    day = os.environ.get("POST_DATE") or datetime.datetime.now(KST).strftime("%Y-%m-%d")
+    now = datetime.datetime.now(KST)
+    if os.environ.get("GITHUB_EVENT_NAME") == "schedule" and not (20 <= now.hour <= 23):
+        # GitHub 예약 실행이 몇 시간씩 늦어지면 엉뚱한 시간(새벽 등)에 올라가므로, 저녁 20~24시 밖이면 건너뛴다.
+        print(f"예약 실행이 게시 시간대(20~24시 KST) 밖({now:%H:%M})이라 건너뜀"); return
+    day = os.environ.get("POST_DATE") or now.strftime("%Y-%m-%d")
     folder = f"queue/{day}"
     if dry:
         check_account()
