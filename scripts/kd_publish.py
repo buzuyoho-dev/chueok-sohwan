@@ -74,36 +74,53 @@ def ensure_pages(tok):
             print("page created:", r.get("url"))
 
 
+def pub_day(now_kst):
+    """게시 '하루' 기준: KST 06:00에 하루가 바뀐다(새벽 실행도 전날 저녁 몫으로 친다)."""
+    return (now_kst - datetime.timedelta(hours=6)).strftime("%Y-%m-%d")
+
+
 def main():
     dry = "--dry-run" in sys.argv
-    today = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)).strftime("%Y-%m-%d")
-    day = next((a for a in sys.argv[1:] if re.match(r"\d{4}-\d{2}-\d{2}$", a)), today)
+    now = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)
+    today = pub_day(now)
+    manual = next((a for a in sys.argv[1:] if re.match(r"\d{4}-\d{2}-\d{2}$", a)), None)
     used = set(json.load(open(TERMS))) if os.path.exists(TERMS) else set()
-    # 대기열 전체 검사(오늘 것뿐 아니라 미리 문제를 잡기 위해)
+    queued = sorted(d for d in os.listdir(QUEUE) if os.path.exists(os.path.join(QUEUE, d, "post.json")))
+    # 수동 지정이 없으면: 오늘(게시 하루) 이전 날짜 중 가장 오래된 글 1편 (예약이 밀려 놓친 날도 따라잡음)
+    day = manual or next((d for d in queued if d <= today), None)
     bad = False
-    for d in sorted(os.listdir(QUEUE)):
-        pj = os.path.join(QUEUE, d, "post.json")
-        if os.path.exists(pj):
-            errs = check(json.load(open(pj, encoding="utf-8")), used)
-            print(d, "OK" if not errs else errs)
-            bad |= bool(errs) and d == day
+    for d in queued:
+        errs = check(json.load(open(os.path.join(QUEUE, d, "post.json"), encoding="utf-8")), used)
+        print(d, "OK" if not errs else errs)
+        bad |= bool(errs) and d == day
     if dry:
-        return
+        print("would publish:", day); return
     tok = token()
     ensure_pages(tok)
-    pj = os.path.join(QUEUE, day, "post.json")
-    if not os.path.exists(pj):
-        print("no post for", day); return
+    if not manual:
+        # GitHub 예약 실행은 몇 시간씩 밀릴 수 있다: 저녁~새벽(21:00~05:59 KST)에만 게시, 하루 1편
+        if not (now.hour >= 21 or now.hour < 6):
+            print("outside 21:00-05:59 KST window, skip"); return
+        for d in os.listdir(DONE):
+            pj = os.path.join(DONE, d, "post.json")
+            if os.path.exists(pj) and json.load(open(pj, encoding="utf-8")).get("pub_day") == today:
+                print("already published for", today); return
+    if not day:
+        print("no post for", today); return
     if bad:
         sys.exit("quality check failed; not publishing")
+    pj = os.path.join(QUEUE, day, "post.json")
     post = json.load(open(pj, encoding="utf-8"))
     r = api("POST", "/posts/", tok, {"title": post["title"], "content": post["html"], "labels": post.get("labels", [])})
     print("published:", r.get("url"))
     used.add(post["term"].lower())
     json.dump(sorted(used), open(TERMS, "w"), indent=1)
-    post["url"] = r.get("url")
+    post["url"], post["pub_day"] = r.get("url"), today
     json.dump(post, open(pj, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    shutil.move(os.path.join(QUEUE, day), os.path.join(DONE, day))
+    dest, n = os.path.join(DONE, today), 2
+    while os.path.exists(dest):
+        dest, n = os.path.join(DONE, f"{today}-{n}"), n + 1
+    shutil.move(os.path.join(QUEUE, day), dest)
 
 
 if __name__ == "__main__":
