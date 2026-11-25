@@ -1,7 +1,13 @@
 name: 매일 인스타 게시
 on:
   schedule:
-    - cron: "30 11 * * *"   # 매일 20:30 KST (11:30 UTC)
+    # 매일 20:30 KST 안팎. GitHub 예약 실행은 늦거나 빠질 수 있어 여러 번 걸어 둔다.
+    # 이미 올린 날은 queue에 폴더가 없어 그냥 넘어가고, 20~24시 KST 밖이면 건너뛴다.
+    - cron: "23 11 * * *"   # 20:23 KST
+    - cron: "41 11 * * *"   # 20:41 KST
+    - cron: "07 12 * * *"   # 21:07 KST
+    - cron: "37 12 * * *"   # 21:37 KST
+    - cron: "17 13 * * *"   # 22:17 KST
   workflow_dispatch:
     inputs:
       post_date: { description: "올릴 날짜 YYYY-MM-DD (비우면 오늘)", required: false }
