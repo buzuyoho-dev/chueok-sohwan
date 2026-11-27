@@ -2,7 +2,7 @@ name: 댓글 관리
 on:
   workflow_dispatch:
     inputs:
-      mode: { description: "fetch(댓글 가져오기) 또는 reply(답글 달기)", required: true, default: fetch }
+      mode: { description: "fetch(댓글) / reply(실행) / diag(진단)", required: true, default: fetch }
 permissions:
   contents: write
 concurrency: comments
@@ -16,7 +16,7 @@ jobs:
           IG_TOKEN: ${{ secrets.IG_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           MODE: ${{ inputs.mode }}
-        run: python3 scripts/comments.py
+        run: if [ "$MODE" = diag ]; then python3 scripts/diag.py; else python3 scripts/comments.py; fi
       - name: 기록 저장
         if: always()
         run: |

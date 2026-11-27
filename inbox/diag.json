@@ -1,0 +1,44 @@
+{
+ "at": "2026-11-26T07:19+09:00",
+ "account": {
+  "id": "17841423870267443",
+  "biography": "우리는 그때 뭘 했을까? 메일 하나씩 꺼내보는 그 시절 이야기!",
+  "followers_count": 0,
+  "follows_count": 0,
+  "media_count": 2,
+  "name": "추억소환소",
+  "profile_picture_url": "https://scontent-iad6-1.xx.fbcdn.net/v/t51.82787-15/928337851_18124807708795676_1531156452213989302_n.jpg?_nc_cat=110&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=7d201b&_nc_ohc=MQEJpJR3TIEQ7kNvwFROJIO&_nc_oc=AdqzH1e8UXH2T-pbzH9i8z_SyZfOBFMQ5ALOwEflosZazLjNvbeoDPOWorLbcSFBFBk&_nc_zt=23&_nc_ht=scontent-iad6-1.xx&edm=AJ-jyNUEAAAA&_nc_gid=NTx1jmhYIe-jqW3ZPIRNlw&oh=00_AQTSsJUFhL_52kOFTYL8ZM6YR2Dhn9NwFVPfEqYUFIy1OQ&oe=6B0D429E",
+  "username": "chueok.sohwan"
+ },
+ "account_insights_day": {
+  "error": "{\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"Asbm7rrTPOng2T7gHPz8tZm\"}}"
+ },
+ "media": [
+  {
+   "id": "18127542751930633",
+   "caption": "2000년대에 개봉해 관객 1,000만 명을 넘은 영화, 딱 6편 🎬",
+   "comments_count": 0,
+   "like_count": 0,
+   "media_product_type": "FEED",
+   "media_type": "CAROUSEL_ALBUM",
+   "permalink": "https://www.instagram.com/p/DgI6zi9lz_R/",
+   "timestamp": "2026-11-24T21:27:15+0000",
+   "insights": {
+    "error": "{\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"Akn-xoDCK7OSGQPZE65a-q7\"}}"
+   }
+  },
+  {
+   "id": "18140081167782455",
+   "caption": "20년 전 그해, 우리는 뭘 사고 뭘 봤을까? 🛍️",
+   "comments_count": 0,
+   "like_count": 0,
+   "media_product_type": "FEED",
+   "media_type": "CAROUSEL_ALBUM",
+   "permalink": "https://www.instagram.com/p/DgF5v6lmKmk/",
+   "timestamp": "2026-11-23T17:20:18+0000",
+   "insights": {
+    "error": "{\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthException\",\"fbtrace_id\":\"AgQzG817mw8_jICaTCa5ciG\"}}"
+   }
+  }
+ ]
+}
