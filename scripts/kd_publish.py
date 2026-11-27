@@ -98,9 +98,7 @@ def main():
     tok = token()
     ensure_pages(tok)
     if not manual:
-        # GitHub 예약 실행은 몇 시간씩 밀릴 수 있다: 저녁~새벽(21:00~05:59 KST)에만 게시, 하루 1편
-        if not (now.hour >= 21 or now.hour < 6):
-            print("outside 21:00-05:59 KST window, skip"); return
+        # GitHub 예약 실행은 10시간 가까이 밀리기도 한다: 시간대는 따지지 않고, 게시 하루당 1편만
         for d in os.listdir(DONE):
             pj = os.path.join(DONE, d, "post.json")
             if os.path.exists(pj) and json.load(open(pj, encoding="utf-8")).get("pub_day") == today:
@@ -115,11 +113,12 @@ def main():
     print("published:", r.get("url"))
     used.add(post["term"].lower())
     json.dump(sorted(used), open(TERMS, "w"), indent=1)
-    post["url"], post["pub_day"] = r.get("url"), today
+    pub = manual or today  # 수동 게시는 지정한 날짜 몫으로 기록
+    post["url"], post["pub_day"] = r.get("url"), pub
     json.dump(post, open(pj, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    dest, n = os.path.join(DONE, today), 2
+    dest, n = os.path.join(DONE, pub), 2
     while os.path.exists(dest):
-        dest, n = os.path.join(DONE, f"{today}-{n}"), n + 1
+        dest, n = os.path.join(DONE, f"{pub}-{n}"), n + 1
     shutil.move(os.path.join(QUEUE, day), dest)
 
 
